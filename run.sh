@@ -3,7 +3,7 @@
 # Global vars
 PROG_NAME='DockerTinyproxy'
 PROXY_CONF='/etc/tinyproxy/tinyproxy.conf'
-TAIL_LOG='/var/log/tinyproxy/tinyproxy.log'
+RUN_LOG='/var/log/tinyproxy/tinyproxy.log'
 
 # Usage: screenOut STATUS message
 screenOut() {
@@ -109,35 +109,6 @@ setAuth() {
     fi
 }
 
-setFilter(){
-    if [ -n "$FilterDefaultDeny" ] ; then
-        screenOut "Setting up FilterDefaultDeny."
-        sed -i -e"s/#FilterDefaultDeny Yes/FilterDefaultDeny $FilterDefaultDeny/" $PROXY_CONF
-    fi
-
-    if [ -n "$FilterURLs" ] ; then
-        screenOut "Setting up FilterURLs."
-        sed -i -e"s/#FilterURLs Yes/FilterURLs $FilterURLs/" $PROXY_CONF
-    fi
-    
-    if [ -n "$FilterExtended" ] ; then
-            screenOut "Setting up FilterExtended."
-            sed -i -e"s/#FilterExtended Yes/FilterExtended $FilterExtended/" $PROXY_CONF
-    fi
-    
-    if [ -n "$FilterCaseSensitive" ] ; then
-            screenOut "Setting up FilterCaseSensitive."
-            sed -i -e"s/#FilterCaseSensitive Yes/FilterCaseSensitive $FilterCaseSensitive/" $PROXY_CONF
-    fi
-    
-    
-    if [ -n "$Filter" ] ; then
-            screenOut "Setting up Filter."
-            sed -i -e"s+#Filter \"/etc/tinyproxy/filter\"+Filter \"$Filter\"+" $PROXY_CONF
-    fi
-
-}
-
 setTimeout() {
     if [ -n "${TIMEOUT}"  ]; then
         screenOut "Setting up Timeout."
@@ -153,11 +124,11 @@ startService() {
 }
 
 tailLog() {
-    touch /var/log/tinyproxy/tinyproxy.log
+    touch $RUN_LOG
     screenOut "Tailing Tinyproxy log..."
-    tail -f $TAIL_LOG
-    checkStatus $? "Could not tail $TAIL_LOG" \
-                   "Stopped tailing $TAIL_LOG"
+    tail -f $RUN_LOG
+    checkStatus $? "Could not tail $RUN_LOG" \
+                   "Stopped tailing $RUN_LOG"
 }
 
 # Check args
@@ -175,8 +146,6 @@ export rawRules="$@" && parsedRules=$(parseAccessRules $rawRules) && unset rawRu
 setAccess $parsedRules
 # Enable basic auth (if any)
 setAuth
-# Enable Filtering (if any)
-setFilter
 # Set Timeout (if any)
 setTimeout
 # Enable log to file
