@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Global vars
-PROG_NAME='DockerTinyproxy'
+PROG_NAME='DockerScript'
 PROXY_CONF='/etc/tinyproxy/tinyproxy.conf'
 RUN_LOG='/var/log/tinyproxy/tinyproxy.log'
 
@@ -52,6 +52,13 @@ displayUsage() {
     echo
 }
 
+startService() {
+    screenOut "Starting Tinyproxy service..."
+    /usr/bin/tinyproxy
+    checkStatus $? "Could not start Tinyproxy service." \
+                   "Tinyproxy service started successfully."
+}
+
 stopService() {
     screenOut "Checking for running Tinyproxy service..."
     if [ "$(pidof tinyproxy)" ]; then
@@ -73,10 +80,6 @@ parseAccessRules() {
     echo "$list" | sed 's/.\{2\}$//'
 }
 
-enableLogFile() {
-	sed -i -e"s,^#LogFile,LogFile," $PROXY_CONF
-}
-
 setAccess() {
     if [[ "$1" == *ANY* ]]; then
         sed -i -e"s/^Allow /#Allow /" $PROXY_CONF
@@ -96,15 +99,11 @@ setAuth() {
     fi
 }
 
-startService() {
-    screenOut "Starting Tinyproxy service..."
-    /usr/bin/tinyproxy
-    checkStatus $? "Could not start Tinyproxy service." \
-                   "Tinyproxy service started successfully."
+enableLogFile() {
+    sed -i -e"s,^#LogFile,LogFile," $PROXY_CONF
 }
 
 tailLog() {
-    touch $RUN_LOG
     screenOut "Tailing Tinyproxy log..."
     tail -f $RUN_LOG
     checkStatus $? "Could not tail $RUN_LOG" \
@@ -121,15 +120,19 @@ echo && screenOut "$PROG_NAME script started..."
 # Stop Tinyproxy if running
 stopService
 # Copy config file
-cp -f /usr/local/tinyproxy/tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
-# Parse ACL from args
-export rawRules="$@" && parsedRules=$(parseAccessRules $rawRules) && unset rawRules
-# Set ACL in Tinyproxy config
-setAccess $parsedRules
-# Enable basic auth (if any)
-setAuth
-# Enable log to file
-enableLogFile
+if [ ! -f "/etc/tinyproxy/tinyproxy.conf" ]; then
+    # Copy new config
+    screenOut "Init a new config..."
+    cp -f /usr/local/tinyproxy/tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
+    # Parse ACL from args
+    export rawRules="$@" && parsedRules=$(parseAccessRules $rawRules) && unset rawRules
+    # Enable ACL Control
+    setAccess $parsedRules
+    # Enable basic auth
+    setAuth
+    # Enable log to file
+    enableLogFile
+fi
 # Start Tinyproxy
 startService
 # Tail Tinyproxy log
