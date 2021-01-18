@@ -7,14 +7,13 @@
 
 ```
 Usage:
-    docker run -d --name='tinyproxy' -p <Host_Port>:8888 --env BASIC_AUTH_USER=<username> --env BASIC_AUTH_PASSWORD=<password> --env TIMEOUT=<timeout> monokal/tinyproxy:latest <ACL>
+    docker run -d --name='tinyproxy' -p <Port>:8888 --env BASIC_AUTH_USER=<username> --env BASIC_AUTH_PASSWORD=<password> --env TIMEOUT=<Timeout> monokal/tinyproxy:latest <ACL>
 
-        - Set <Host_Port> to the port you wish the proxy to be accessible from.
-        - Set <ACL> to 'ANY' to allow unrestricted proxy access, or one or more space seperated IP/CIDR addresses for tighter security.
-        - Basic auth is optional.
-        - Timeout is optional.
+        - Set <Port> to the port you wish the proxy to be accessible from.
+        - Set <ACL> to 'ANY' to allow unrestricted proxy access, 
+        	or one or more space seperated IP/CIDR addresses for tighter security.
 
-    Examples:
+Examples:
         docker run -d --name='tinyproxy' -p 6666:8888 monokal/tinyproxy:latest ANY
         docker run -d --name='tinyproxy' -p 7777:8888 monokal/tinyproxy:latest 87.115.60.124
         docker run -d --name='tinyproxy' -p 8888:8888 monokal/tinyproxy:latest 10.103.0.100/24 192.168.1.22/16

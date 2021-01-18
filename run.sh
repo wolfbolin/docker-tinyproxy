@@ -38,16 +38,17 @@ checkStatus() {
 
 displayUsage() {
     echo
-    echo '  Usage:'
-    echo "      docker run -d --name='tinyproxy' -p <Host_Port>:8888 dannydirect/tinyproxy:latest <ACL>"
+    echo "  Usage:"
+    echo "      docker run -d --name='tinyproxy' -p <Port>:8888 dannydirect/tinyproxy:latest <ACL>"
     echo
-    echo "      - Set <Host_Port> to the port you wish the proxy to be accessible from."
-    echo "      - Set <ACL> to 'ANY' to allow unrestricted proxy access, or one or more spece seperated IP/CIDR addresses for tighter security."
+    echo "      - Set <Port> to the port you wish the proxy to be accessible from."
+    echo "      - Set <ACL> to 'ANY' to allow unrestricted proxy access,"
+    echo "          or one or more spece seperated IP/CIDR addresses for tighter security."
     echo
-    echo "      Examples:"
-    echo "          docker run -d --name='tinyproxy' -p 6666:8888 dannydirect/tinyproxy:latest ANY"
-    echo "          docker run -d --name='tinyproxy' -p 7777:8888 dannydirect/tinyproxy:latest 87.115.60.124"
-    echo "          docker run -d --name='tinyproxy' -p 8888:8888 dannydirect/tinyproxy:latest 10.103.0.100/24 192.168.1.22/16"
+    echo "  Examples:"
+    echo "      docker run -d --name='tinyproxy' -p 6666:8888 dannydirect/tinyproxy:latest ANY"
+    echo "      docker run -d --name='tinyproxy' -p 7777:8888 dannydirect/tinyproxy:latest 87.115.60.124"
+    echo "      docker run -d --name='tinyproxy' -p 8888:8888 dannydirect/tinyproxy:latest 10.103.0.100/24 192.168.1.22/16"
     echo
 }
 
@@ -109,13 +110,6 @@ setAuth() {
     fi
 }
 
-setTimeout() {
-    if [ -n "${TIMEOUT}"  ]; then
-        screenOut "Setting up Timeout."
-        sed -i -e"s/Timeout 600/Timeout ${TIMEOUT}/" $PROXY_CONF
-    fi
-}
-
 startService() {
     screenOut "Starting Tinyproxy service..."
     /usr/bin/tinyproxy
@@ -146,8 +140,6 @@ export rawRules="$@" && parsedRules=$(parseAccessRules $rawRules) && unset rawRu
 setAccess $parsedRules
 # Enable basic auth (if any)
 setAuth
-# Set Timeout (if any)
-setTimeout
 # Enable log to file
 enableLogFile
 # Start Tinyproxy
