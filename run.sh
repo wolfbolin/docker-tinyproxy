@@ -73,20 +73,6 @@ parseAccessRules() {
     echo "$list" | sed 's/.\{2\}$//'
 }
 
-setMiscConfig() {
-    sed -i -e"s,^MinSpareServers ,MinSpareServers\t1 ," $PROXY_CONF
-    checkStatus $? "Set MinSpareServers - Could not edit $PROXY_CONF" \
-                   "Set MinSpareServers - Edited $PROXY_CONF successfully."
-
-    sed -i -e"s,^MaxSpareServers ,MaxSpareServers\t1 ," $PROXY_CONF
-    checkStatus $? "Set MinSpareServers - Could not edit $PROXY_CONF" \
-                   "Set MinSpareServers - Edited $PROXY_CONF successfully."
-    
-    sed -i -e"s,^StartServers ,StartServers\t1 ," $PROXY_CONF
-    checkStatus $? "Set MinSpareServers - Could not edit $PROXY_CONF" \
-                   "Set MinSpareServers - Edited $PROXY_CONF successfully."
-}
-
 enableLogFile() {
 	sed -i -e"s,^#LogFile,LogFile," $PROXY_CONF
 }
@@ -134,6 +120,8 @@ fi
 echo && screenOut "$PROG_NAME script started..."
 # Stop Tinyproxy if running
 stopService
+# Copy config file
+cp -f /usr/local/tinyproxy/tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 # Parse ACL from args
 export rawRules="$@" && parsedRules=$(parseAccessRules $rawRules) && unset rawRules
 # Set ACL in Tinyproxy config
